@@ -1,12 +1,12 @@
 // server.js
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); // Add this line at the very top
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-//replace actual api keys
+
+// Replace with your actual Ambient Weather API keys
 const API_KEY = process.env.API_KEY;
 const APP_KEY = process.env.APP_KEY;
 
@@ -28,7 +28,7 @@ app.get('/api/weather', async (req, res) => {
 
     res.json({
       temperature: lastData.tempf ? ((lastData.tempf - 32) * 5 / 9).toFixed(1) : "--",
-      windSpeed: lastData.windspeedmph ? (lastData.windspeedmph * 1.60934).toFixed(1) : "--",
+      windSpeed: lastData.windspeedmph ?? "--",
       humidity: lastData.humidity ?? "--",
       cloudCover: lastData.solarradiation ? (100 - lastData.solarradiation) : "--"
     });
@@ -36,46 +36,6 @@ app.get('/api/weather', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch weather data' });
-  }
-});
-
-// API route for historical chart data
-app.get('/api/weather/history', async (req, res) => {
-  try {
-    // Get device MAC address
-    const devicesResponse = await axios.get('https://api.ambientweather.net/v1/devices', {
-      params: {
-        apiKey: API_KEY,
-        applicationKey: APP_KEY
-      }
-    });
-
-    const device = devicesResponse.data[0];
-    const macAddress = device.macAddress;
-
-    // Fetch past data
-    const historyResponse = await axios.get(`https://api.ambientweather.net/v1/devices/${macAddress}`, {
-      params: {
-        apiKey: API_KEY,
-        applicationKey: APP_KEY
-      }
-    });
-
-    const entries = historyResponse.data.slice(0, 6).reverse(); // last 6 data points
-
-    const labels = entries.map(entry => {
-      const date = new Date(entry.dateutc);
-      return `${date.getHours()}:00`;
-    });
-
-    const temperature = entries.map(entry => entry.tempf ? ((entry.tempf - 32) * 5 / 9).toFixed(1) : null);
-    const precip = entries.map(entry => entry.hourlyrainin ? (entry.hourlyrainin * 25.4).toFixed(2) : 0);
-
-    res.json({ labels, temperature, precip });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch historical weather data' });
   }
 });
 
