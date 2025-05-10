@@ -1,140 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RSET Weather Analysis</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
-      }
-      .weather-card {
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-      .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-      }
-      .nav-link svg {
-        width: 18px;
-        height: 18px;
-      }
-      .small-chart {
-        height: 180px !important;
-      }
-    </style>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-      <div class="container">
-        <a class="navbar-brand fw-bold" href="#">RSET Weather Analysis</a>
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Forecast</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">History</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Alerts</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-        </ul>
-      </div>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSET Weather Analysis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .weather-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .nav-link svg {
+      width: 18px;
+      height: 18px;
+    }
+    .small-chart {
+      height: 180px !important;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">RSET Weather Analysis</a>
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Forecast</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">History</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Alerts</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+      </ul>
+    </div>
+  </nav>
 
-    <div class="container my-5">
-      <h2 class="mb-4">RSET Current Weather</h2>
-      <div class="row g-4">
-        <div class="col-md-3">
-          <div class="card weather-card p-3">
-            <h5>Temperature</h5>
-            <p class="display-6" id="temperature">-- °C</p>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card weather-card p-3">
-            <h5>Wind Speed</h5>
-            <p class="display-6" id="windSpeed">-- km/h</p>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card weather-card p-3">
-            <h5>Humidity</h5>
-            <p class="display-6" id="humidity">-- %</p>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card weather-card p-3">
-            <h5>Cloud Cover</h5>
-            <p class="display-6" id="cloudCover">-- %</p>
-          </div>
+  <div class="container my-5">
+    <h2 class="mb-4">RSET Current Weather</h2>
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5>Temperature</h5>
+          <p class="display-6" id="temperature">-- °C</p>
         </div>
       </div>
-
-      <div class="row mt-5">
-        <div class="col-md-6">
-          <div class="card p-3" style="height: 250px;">
-            <h6>24-Hour Temperature Forecast</h6>
-            <canvas id="temperatureChart" class="small-chart"></canvas>
-          </div>
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5>Wind Speed</h5>
+          <p class="display-6" id="windSpeed">-- km/h</p>
         </div>
-        <div class="col-md-6">
-          <div class="card p-3" style="height: 250px;">
-            <h6>Precipitation Probability</h6>
-            <canvas id="precipitationChart" class="small-chart"></canvas>
-          </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5>Humidity</h5>
+          <p class="display-6" id="humidity">-- %</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5>Cloud Cover</h5>
+          <p class="display-6" id="cloudCover">-- %</p>
         </div>
       </div>
     </div>
 
-    <footer class="bg-light text-center p-3 mt-5">
-        Rajagiri School of Engineering & Technology |   All Rights Reserved 
-    </footer>
+    <div class="row mt-5">
+      <div class="col-md-6">
+        <div class="card p-3" style="height: 250px;">
+          <h6>24-Hour Temperature Forecast</h6>
+          <canvas id="temperatureChart" class="small-chart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3" style="height: 250px;">
+          <h6>Precipitation Probability</h6>
+          <canvas id="precipitationChart" class="small-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script>
-      // Fetch from backend
-      fetch("/api/weather")
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById("temperature").textContent = `${data.temperature} °C`;
-          document.getElementById("windSpeed").textContent = `${data.windSpeed} km/h`;
-          document.getElementById("humidity").textContent = `${data.humidity} %`;
-          document.getElementById("cloudCover").textContent = `${data.cloudCover} %`;
-        })
-        .catch(err => console.error("Failed to fetch weather data:", err));
+  <footer class="bg-light text-center p-3 mt-5">
+    Rajagiri School of Engineering & Technology | All Rights Reserved
+  </footer>
 
-      const ctx1 = document.getElementById("temperatureChart").getContext("2d");
-      new Chart(ctx1, {
-        type: "line",
-        data: {
-          labels: ["1h", "2h", "3h", "4h", "5h", "6h"],
-          datasets: [{
-            label: "Temp (°C)",
-            data: [10, 9, 9, 12, 15, 13],
-            borderColor: "#3498db",
-            fill: false,
-            tension: 0.3
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
+  <script>
+    // Fetch current weather
+    fetch("/api/weather")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("temperature").textContent = `${data.temperature} °C`;
+        document.getElementById("windSpeed").textContent = `${data.windSpeed} km/h`;
+        document.getElementById("humidity").textContent = `${data.humidity} %`;
+        document.getElementById("cloudCover").textContent = `${data.cloudCover} %`;
+      })
+      .catch(err => console.error("Failed to fetch weather data:", err));
 
-      const ctx2 = document.getElementById("precipitationChart").getContext("2d");
-      new Chart(ctx2, {
-        type: "line",
-        data: {
-          labels: ["1h", "2h", "3h", "4h", "5h", "6h"],
-          datasets: [{
-            label: "Precip (%)",
-            data: [0.2, 2, 1, 1, 0.5, 0.3],
-            borderColor: "#2ecc71",
-            fill: false,
-            tension: 0.3
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
-    </script>
-  </body>
+    // Fetch historical data for charts
+    fetch("/api/weather/history")
+      .then(res => res.json())
+      .then(chartData => {
+        const ctx1 = document.getElementById("temperatureChart").getContext("2d");
+        new Chart(ctx1, {
+          type: "line",
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              label: "Temp (°C)",
+              data: chartData.temperature,
+              borderColor: "#3498db",
+              fill: false,
+              tension: 0.3
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        const ctx2 = document.getElementById("precipitationChart").getContext("2d");
+        new Chart(ctx2, {
+          type: "line",
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              label: "Precip (mm)",
+              data: chartData.precip,
+              borderColor: "#2ecc71",
+              fill: false,
+              tension: 0.3
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      })
+      .catch(err => console.error("Chart data error:", err));
+  </script>
+</body>
 </html>
