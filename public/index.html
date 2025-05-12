@@ -75,13 +75,13 @@
       <div class="row mt-5">
         <div class="col-md-6">
           <div class="card p-3" style="height: 250px;">
-            <h6>6-Hour Temperature Forecast</h6>
+            <h6>24-Hour Temperature Forecast</h6>
             <canvas id="temperatureChart" class="small-chart"></canvas>
           </div>
         </div>
         <div class="col-md-6">
           <div class="card p-3" style="height: 250px;">
-            <h6>6-Hour Precipitation Probability</h6>
+            <h6>Precipitation Probability</h6>
             <canvas id="precipitationChart" class="small-chart"></canvas>
           </div>
         </div>
@@ -92,51 +92,26 @@
         Rajagiri School of Engineering & Technology |   All Rights Reserved 
     </footer>
 
-<script>
-  // Fetch current weather
-  fetch("/api/weather")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("temperature").textContent = `${data.temperature} °C`;
-      document.getElementById("windSpeed").textContent = `${data.windSpeed} km/h`;
-      document.getElementById("humidity").textContent = `${data.humidity} %`;
-      document.getElementById("cloudCover").textContent = `${data.cloudCover} %`;
-    })
-    .catch(err => console.error("Failed to fetch weather data:", err));
+    <script>
+      // Fetch from backend
+      fetch("/api/weather")
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("temperature").textContent = `${data.temperature} °C`;
+          document.getElementById("windSpeed").textContent = `${data.windSpeed} km/h`;
+          document.getElementById("humidity").textContent = `${data.humidity} %`;
+          document.getElementById("cloudCover").textContent = `${data.cloudCover} %`;
+        })
+        .catch(err => console.error("Failed to fetch weather data:", err));
 
-  // Fetch 6-hour history
-  fetch("/api/weather/history")
-    .then(res => res.json())
-    .then(history => {
-      const labels = history.map(entry => {
-        const date = new Date(entry.timestamp);
-
-        // Convert to IST (UTC+5:30)
-        const istOffsetMs = 5.5 * 60 * 60 * 1000;
-        const istDate = new Date(date.getTime() + istOffsetMs);
-
-        let hours = istDate.getHours();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12; // convert 0 to 12
-        return `${hours}:00 ${ampm}`;
-      });
-
-      const temps = history.map(entry =>
-        entry.tempf !== null ? ((entry.tempf - 32) * 5 / 9).toFixed(1) : null
-      );
-
-      const rain = history.map(entry =>
-        entry.hourlyrainin !== null ? (entry.hourlyrainin * 100).toFixed(1) : null
-      );
-
-      // Temperature chart
-      new Chart(document.getElementById("temperatureChart").getContext("2d"), {
+      const ctx1 = document.getElementById("temperatureChart").getContext("2d");
+      new Chart(ctx1, {
         type: "line",
         data: {
-          labels: labels,
+          labels: ["1h", "2h", "3h", "4h", "5h", "6h"],
           datasets: [{
             label: "Temp (°C)",
-            data: temps,
+            data: [10, 9, 9, 12, 15, 13],
             borderColor: "#3498db",
             fill: false,
             tension: 0.3
@@ -145,14 +120,14 @@
         options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // Precipitation chart
-      new Chart(document.getElementById("precipitationChart").getContext("2d"), {
+      const ctx2 = document.getElementById("precipitationChart").getContext("2d");
+      new Chart(ctx2, {
         type: "line",
         data: {
-          labels: labels,
+          labels: ["1h", "2h", "3h", "4h", "5h", "6h"],
           datasets: [{
             label: "Precip (%)",
-            data: rain,
+            data: [0.2, 2, 1, 1, 0.5, 0.3],
             borderColor: "#2ecc71",
             fill: false,
             tension: 0.3
@@ -160,10 +135,6 @@
         },
         options: { responsive: true, maintainAspectRatio: false }
       });
-    })
-    .catch(err => console.error("Failed to fetch history data:", err));
-</script>
-
-
+    </script>
   </body>
 </html>
