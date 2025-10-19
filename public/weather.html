@@ -111,13 +111,13 @@
     <div class="row mt-5">
       <div class="col-md-6">
         <div class="card p-3" style="height: 250px;">
-          <h6>6-Hour Temperature Forecast</h6>
+          <h6>24-Hour Temperature Forecast</h6>
           <canvas id="temperatureChart" class="small-chart"></canvas>
         </div>
       </div>
       <div class="col-md-6">
         <div class="card p-3" style="height: 250px;">
-          <h6>6-Hour Precipitation Probability</h6>
+          <h6>24-Hour Precipitation Probability</h6>
           <canvas id="precipitationChart" class="small-chart"></canvas>
         </div>
       </div>
@@ -132,69 +132,132 @@
     Rajagiri School of Engineering & Technology | All Rights Reserved
   </footer>
 
+  
   <script>
-    fetch("/api/weather")
-      .then(res => res.json())
-      .then(data => {
+    // ===== Helpers =====
+    function toISTLabel(ts) {
+      const date = new Date(ts);
+      const istOffsetMs = 5.5 * 60 * 60 * 1000;
+      const istDate = new Date(date.getTime() + istOffsetMs);
+      let h = istDate.getHours();
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${h}:00 ${ampm}`;
+    }
+
+    // ===== Current stat cards =====
+    async function updateCurrent() {
+      try {
+        const res = await fetch("/api/weather");
+        const data = await res.json();
         document.getElementById("temperature").textContent = `${data.temperature} °C`;
         document.getElementById("windSpeed").textContent = `${data.windSpeed} km/h`;
         document.getElementById("humidity").textContent = `${data.humidity} %`;
         document.getElementById("cloudCover").textContent = `${data.cloudCover} %`;
-      })
-      .catch(err => console.error("Failed to fetch weather data:", err));
+      } catch (e) {
+        console.error("Failed to fetch weather data:", e);
+      }
+    }
 
-    fetch("/api/weather/history")
-      .then(res => res.json())
-      .then(history => {
-        const labels = history.map(entry => {
-          const date = new Date(entry.timestamp);
-          const istOffsetMs = 5.5 * 60 * 60 * 1000;
-          const istDate = new Date(date.getTime() + istOffsetMs);
-          let hours = istDate.getHours();
-          const ampm = hours >= 12 ? 'PM' : 'AM';
-          hours = hours % 12 || 12;
-          return `${hours}:00 ${ampm}`;
-        });
+   // ===== Charts =====
+let tempChart, rainChart;
 
-        const temps = history.map(entry =>
-          entry.tempf !== null ? ((entry.tempf - 32) * 5 / 9).toFixed(1) : null
-        );
+function buildOrUpdateCharts(history) {
+  // Convert backend data to arrays for Chart.js
+  const labels = history.map(entry => entry.time);
+  const temps = history.map(entry =>
+    entry.temperature !== null ? Number(entry.temperature) : null
+  );
+  const rain = history.map(entry =>
+    entry.rain !== null ? Number((entry.rain * 100).toFixed(1)) : null
+  );
 
-        const rain = history.map(entry =>
-          entry.hourlyrainin !== null ? (entry.hourlyrainin * 100).toFixed(1) : null
-        );
-
-        new Chart(document.getElementById("temperatureChart").getContext("2d"), {
-          type: "line",
-          data: {
-            labels: labels,
-            datasets: [{
-              label: "Temp (°C)",
-              data: temps,
-              borderColor: "#8B0000",
-              fill: false,
-              tension: 0.3
-            }]
+  // If first time, build new charts
+  if (!tempChart) {
+    tempChart = new Chart(document.getElementById("temperatureChart").getContext("2d"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Temperature (°C)",
+          data: temps,
+          borderColor: "#8B0000",
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 0 // removes clutter
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: false,
+            title: { display: true, text: "°C" }
           },
-          options: { responsive: true, maintainAspectRatio: false }
-        });
+          x: {
+            title: { display: true, text: "Time" },
+            ticks: { maxTicksLimit: 8 }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
 
-        new Chart(document.getElementById("precipitationChart").getContext("2d"), {
-          type: "line",
-          data: {
-            labels: labels,
-            datasets: [{
-              label: "Precip (%)",
-              data: rain,
-              borderColor: "#8B0000",
-              fill: false,
-              tension: 0.3
-            }]
+    rainChart = new Chart(document.getElementById("precipitationChart").getContext("2d"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Precipitation (%)",
+          data: rain,
+          borderColor: "#8B0000",
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: "%" }
           },
-          options: { responsive: true, maintainAspectRatio: false }
-        });
-      })
-      .catch(err => console.error("Failed to fetch history data:", err));
-  </script>
-</body>
-</html>
+          x: {
+            title: { display: true, text: "Time" },
+            ticks: { maxTicksLimit: 8 }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  } 
+  // If already built, update datasets
+  else {
+    tempChart.data.labels = labels;
+    tempChart.data.datasets[0].data = temps;
+    tempChart.update();
+
+    rainChart.data.labels = labels;
+    rainChart.data.datasets[0].data = rain;
+    rainChart.update();
+  }
+}
+
+async function fetchAndUpdateCharts() {
+  try {
+    const res = await fetch("/api/weather/history");
+    const history = await res.json();
+
+    // Optional: smooth graph by showing one point every 30 min
+    const cleanHistory = history.filter((_, i) => i % 6 === 0);
+
+    buildOrUpdateCharts(cleanHistory);
+  } catch (e) {
+    console.error("❌ Failed to fetch history data:", e);
+  }
+}

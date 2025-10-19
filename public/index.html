@@ -2,73 +2,265 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RSET Weather Landing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSET Weather Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body, html {
-      height: 100%;
-      font-family: Arial, sans-serif;
-    }
-
     body {
-      background: url('KE.jpg') no-repeat center center fixed;
-      background-size: cover;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
     }
 
-    .container {
-      background: white;
-      padding: 30px 40px;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      max-width: 400px;
+    .weather-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .container img {
-      width: 120px;
-      margin-bottom: 15px;
+    .weather-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
-    .container h1 {
+    .small-chart {
+      height: 180px !important;
+    }
+
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .navbar-brand img {
+      height: 40px;
+    }
+
+    .nav-link.active {
+      color: #8B0000 !important;
+      font-weight: bold;
+      border-bottom: 2px solid #8B0000;
+      padding-bottom: 2px;
+    }
+
+    h2, h5, h6 {
       color: #8B0000;
-      font-size: 20px;
-      margin-bottom: 30px;
     }
 
-    .btn {
-      padding: 14px 24px;
-      font-size: 16px;
-      background-color: #8B0000;
+    .card h5 {
+      color: #8B0000;
+    }
+
+    footer {
+      background: linear-gradient(to right, #600000, #8B0000);
       color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-      transition: background-color 0.3s ease;
     }
 
-    .btn:hover {
-      background-color: #600000;
+    .weather-icon {
+      font-size: 1.5rem;
+      margin-right: 8px;
+      color: #8B0000;
     }
   </style>
 </head>
 <body>
+  <nav class="navbar navbar-expand-lg shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="#"><img src="rset.gif" alt="RSET Logo"></a>
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Forecast</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">History</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Alerts</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <div class="container">
-    <img src="rset.gif" alt="RSET Logo">
-    <h1>Welcome to RSET Weather Station</h1>
-    <button class="btn" onclick="location.href='weather.html'">Go to Weather Dashboard</button>
+  <div class="container my-5 animate__animated animate__fadeInUp">
+    <h2 class="mb-4 text-center">RSET Current Weather</h2>
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5><i class="wi wi-thermometer weather-icon"></i>Temperature</h5>
+          <p class="display-6" id="temperature">-- °C</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5><i class="wi wi-strong-wind weather-icon"></i>Wind Speed</h5>
+          <p class="display-6" id="windSpeed">-- km/h</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5><i class="wi wi-humidity weather-icon"></i>Humidity</h5>
+          <p class="display-6" id="humidity">-- %</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card weather-card p-3">
+          <h5><i class="wi wi-cloudy weather-icon"></i>Cloud Cover</h5>
+          <p class="display-6" id="cloudCover">-- %</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-md-6">
+        <div class="card p-3" style="height: 250px;">
+          <h6>24-Hour Temperature (°C)</h6>
+          <canvas id="temperatureChart" class="small-chart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3" style="height: 250px;">
+          <h6>24-Hour Precipitation (mm)</h6>
+          <canvas id="precipitationChart" class="small-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="index.html" class="btn btn-outline-danger">Home</a>
+    </div>
   </div>
 
+  <footer class="text-center p-3 mt-5">
+    Rajagiri School of Engineering & Technology | All Rights Reserved
+  </footer>
+
+  <script>
+    // ===== Helper: Convert UTC -> IST hour label =====
+    function toISTLabel(ts) {
+      const dateUTC = new Date(ts);
+      const istOffsetMs = 2.25 * 60 * 60 * 1000;
+      const istDate = new Date(dateUTC.getTime() + istOffsetMs);
+      const hour = istDate.getHours();
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      return `${hour12}${ampm}`;
+    }
+
+    // ===== Update Current Weather =====
+    async function updateCurrent() {
+      try {
+        const res = await fetch("/api/weather");
+        if (!res.ok) throw new Error("Bad response");
+        const data = await res.json();
+        document.getElementById("temperature").textContent = `${data.temperature} °C`;
+        document.getElementById("windSpeed").textContent = `${data.windSpeed} km/h`;
+        document.getElementById("humidity").textContent = `${data.humidity} %`;
+        document.getElementById("cloudCover").textContent = `${data.cloudCover} %`;
+      } catch (e) {
+        console.error("Failed to fetch weather data:", e);
+      }
+    }
+
+    // ===== Charts =====
+    let tempChart, rainChart;
+
+    function buildOrUpdateCharts(history) {
+      const sorted = history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      const filtered = sorted.filter((_, i) => i % Math.ceil(sorted.length / 24) === 0);
+
+      const labels = filtered.map(entry => toISTLabel(entry.timestamp));
+      const temps = filtered.map(entry =>
+        entry.tempf ? Number(((entry.tempf - 32) * 5 / 9).toFixed(1)) : null
+      );
+      const rain = filtered.map(entry =>
+        entry.hourlyrainin ? Number((entry.hourlyrainin * 25.4).toFixed(2)) : 0
+      );
+      console.log(labels.text);
+      const tempCtx = document.getElementById("temperatureChart").getContext("2d");
+      const rainCtx = document.getElementById("precipitationChart").getContext("2d");
+
+      const tempConfig = {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: "Temperature (°C)",
+            data: temps,
+            borderColor: "#8B0000",
+            borderWidth: 2,
+            fill: false,
+            tension: 0.25,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: { display: true, text: "Time (IST)" },
+              ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }
+            },
+            y: {
+              beginAtZero: false,
+              title: { display: true, text: "°C" }
+            }
+          }
+        }
+      };
+
+      const rainConfig = {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "Precipitation (mm)",
+            data: rain,
+            backgroundColor: "rgba(139,0,0,0.2)",
+            borderColor: "#8B0000",
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: { display: true, text: "Time (IST)" },
+              ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }
+            },
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "mm" }
+            }
+          }
+        }
+      };
+
+      if (tempChart) tempChart.destroy();
+      if (rainChart) rainChart.destroy();
+
+      tempChart = new Chart(tempCtx, tempConfig);
+      rainChart = new Chart(rainCtx, rainConfig);
+    }
+
+    async function fetchAndUpdateCharts() {
+      try {
+        const res = await fetch("/api/weather/history");
+        if (!res.ok) throw new Error("Bad response from history");
+        const history = await res.json();
+        buildOrUpdateCharts(history);
+      } catch (e) {
+        console.error("❌ Failed to fetch history data:", e);
+      }
+    }
+
+    (function initRealtime() {
+      updateCurrent();
+      fetchAndUpdateCharts();
+      setInterval(() => {
+        updateCurrent();
+        fetchAndUpdateCharts();
+      }, 5 * 60 * 1000); // every 5 minutes
+    })();
+  </script>
 </body>
 </html>
