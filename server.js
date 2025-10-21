@@ -1,8 +1,10 @@
 require('dotenv').config();
+const connectDB = require('./db');
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
 
+connectDB(); 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
